@@ -20,7 +20,7 @@ current <- ""
 for (l in keg) {
   if (grepl("^C ", l)) current <- sub("^C +([0-9]+) .*", "\\1", l)
   if (grepl("^D ", l) && current %in% cats) {
-    id    <- regmatches(l, regexpr("SAOUHSC_[0-9]+", l))
+    id    <- regmatches(l, regexpr("SAOUHSC_[A-Za-z0-9]+", l))
     genes <- c(genes, id)
     # aminoacyl-ARNt synthétases = enzymes EC 6.1.1.x
     if (current == "00970" && grepl("EC:6\\.1\\.1\\.", l)) aars <- c(aars, id)
