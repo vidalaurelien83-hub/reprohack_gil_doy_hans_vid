@@ -11,6 +11,12 @@ From: mambaorg/micromamba:1.5.8
     Usage : apptainer exec cutadapt_1.11.sif cutadapt --help
 
 %post
+    # procps fournit "ps", utilisé par Nextflow pour mesurer les ressources
+    # (installé via apt pour ne pas modifier l'environnement conda)
+    apt-get update
+    apt-get install -y --no-install-recommends procps
+    rm -rf /var/lib/apt/lists/*
+
     # cutadapt 1.11 date de 2016 : il faut un Python ancien (3.5)
     micromamba install -y -p /opt/conda -c conda-forge -c bioconda \
         python=3.5 cutadapt=1.11

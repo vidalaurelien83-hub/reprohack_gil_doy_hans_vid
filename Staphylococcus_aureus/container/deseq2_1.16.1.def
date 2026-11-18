@@ -10,6 +10,12 @@ From: mambaorg/micromamba:1.5.8
     Usage : apptainer exec deseq2_1.16.1.sif Rscript mon_script.R
 
 %post
+    # procps fournit "ps", utilisé par Nextflow pour mesurer les ressources
+    # (installé via apt pour ne pas modifier l'environnement conda)
+    apt-get update
+    apt-get install -y --no-install-recommends procps
+    rm -rf /var/lib/apt/lists/*
+
     # libgfortran=3.0.0 : R 3.4.1 a besoin de libgfortran.so.3 ;
     # sans ce pin, conda installe libgfortran5 (trop récent) et R ne démarre pas
     micromamba install -y -p /opt/conda -c conda-forge -c bioconda -c r \

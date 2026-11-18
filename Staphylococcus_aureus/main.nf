@@ -132,7 +132,8 @@ process DESEQ2 {
 
     script:
     """
-    Rscript ${projectDir}/bin/deseq2.R ${counts} ${samples} | tee deseq2_summary.txt
+    set -o pipefail   # si R plante, l'étape échoue (sinon tee masque l'erreur)
+    Rscript "${projectDir}/bin/deseq2.R" ${counts} ${samples} | tee deseq2_summary.txt
     """
 }
 
@@ -167,10 +168,12 @@ process FIG3C {
     output:
     path "MA_plot_translation.pdf"
     path "translation_genes.tsv"
+    path "fig3c_summary.txt"
 
     script:
     """
-    Rscript ${projectDir}/bin/ma_translation.R ${results} ${kegg} ${names} | tee fig3c_summary.txt
+    set -o pipefail
+    Rscript "${projectDir}/bin/ma_translation.R" ${results} ${kegg} ${names} | tee fig3c_summary.txt
     """
 }
 
@@ -189,7 +192,8 @@ process COMPARE {
 
     script:
     """
-    Rscript ${projectDir}/bin/compare_reference.R ${results} ${reference} | tee comparison_summary.txt
+    set -o pipefail
+    Rscript "${projectDir}/bin/compare_reference.R" ${results} ${reference} | tee comparison_summary.txt
     """
 }
 

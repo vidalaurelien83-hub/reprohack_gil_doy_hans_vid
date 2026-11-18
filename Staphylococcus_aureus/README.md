@@ -9,13 +9,13 @@ Le workflow est écrit avec **Nextflow** et chaque étape tourne dans un contene
 
 git clone https://github.com/vidalaurelien83-hub/reprohack_gil_doy_hans_vid.git
 
-cd "reprohack_gil_doy_hans_vid/Staphylococcus aureus"
+cd reprohack_gil_doy_hans_vid/Staphylococcus_aureus
 
 bash setup.sh
 
 exec bash
 
-cd ~/"reprohack_gil_doy_hans_vid/Staphylococcus aureus"
+cd ~/reprohack_gil_doy_hans_vid/Staphylococcus_aureus
 
 ### Construire les images Apptainer
 
@@ -25,11 +25,15 @@ bash build_images.sh
 
 bash run.sh
 
+`run.sh` fixe la version de Nextflow (`NXF_VER=25.04.8`) : elle est téléchargée automatiquement au premier lancement.
+
+Remarque : les annotations KEGG (BRITE `sao00001`) et AureoWiki utilisées pour la Fig. 3c sont téléchargées au moment de l'exécution (étape `DOWNLOAD_ANNOT`) ; ces bases évoluent, le nombre de gènes de la traduction peut donc légèrement varier selon la date d'exécution.
+
 ### Récupération des figures
 
 Dans le terminal du PC : 
 
-scp "ubuntu@<IP-DE-LA-VM>:~/reprohack_gil_doy_hans_vid/Staphylococcus\ aureus/results/deseq2/*.pdf" .
+scp "ubuntu@<IP-DE-LA-VM>:~/reprohack_gil_doy_hans_vid/Staphylococcus_aureus/results/deseq2/*.pdf" .
 
 
 ## Résultats

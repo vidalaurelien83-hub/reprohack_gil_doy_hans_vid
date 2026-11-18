@@ -1,0 +1,24 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+%labels
+    Tool trimmomatic
+    Version 0.39
+    Source bioconda
+
+%help
+    Trimmomatic 0.39, version utilisée par l'article (trimming des lectures).
+    Usage : apptainer exec trimmomatic_0.39.sif trimmomatic PE -version
+    Adaptateurs fournis : /opt/conda/share/trimmomatic/adapters/
+
+%post
+    # le paquet bioconda installe aussi Java (openjdk) et un script "trimmomatic"
+    micromamba install -y -p /opt/conda -c conda-forge -c bioconda \
+        trimmomatic=0.39 procps-ng
+    micromamba clean -a -y
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+
+%test
+    trimmomatic -version

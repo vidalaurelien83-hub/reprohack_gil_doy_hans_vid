@@ -13,7 +13,8 @@ From: debian:bookworm-slim
 
 %post
     apt-get update
-    apt-get install -y --no-install-recommends wget unzip ca-certificates samtools
+    # procps fournit "ps", utilisé par Nextflow pour mesurer les ressources
+    apt-get install -y --no-install-recommends wget unzip ca-certificates samtools procps
     cd /opt
     wget -q -O bowtie.zip \
         "https://sourceforge.net/projects/bowtie-bio/files/bowtie/0.12.7/bowtie-0.12.7-linux-x86_64.zip/download"
