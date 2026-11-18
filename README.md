@@ -7,15 +7,15 @@ Le workflow est écrit avec **Nextflow** et chaque étape tourne dans un contene
 
 ### Récupération du projet et installation des outils sur la machine virtuelle 
 
-git clone https://github.com/vidalaurelien83-hub/reprohack-Staphylococcus-aureus.git
+git clone https://github.com/vidalaurelien83-hub/reprohack_gil_doy_hans_vid.git
 
-cd reprohack-Staphylococcus-aureus
+cd reprohack_gil_doy_hans_vid
 
 bash setup.sh
 
 exec bash
 
-cd ~/reprohack-Staphylococcus-aureus
+cd ~/reprohack_gil_doy_hans_vid
 
 ### Construire les images Apptainer
 
@@ -29,7 +29,7 @@ bash run.sh
 
 Dans le terminal du PC : 
 
-scp ubuntu@<IP-DE-LA-VM>:~/reprohack-Staphylococcus-aureus/results/deseq2/*.pdf .
+scp ubuntu@<IP-DE-LA-VM>:~/reprohack_gil_doy_hans_vid/results/deseq2/*.pdf .
 
 
 ## Résultats
