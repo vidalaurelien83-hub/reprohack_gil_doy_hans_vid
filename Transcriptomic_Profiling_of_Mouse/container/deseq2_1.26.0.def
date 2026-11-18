@@ -1,0 +1,30 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+%labels
+    Tool R + DESeq2 + tximport
+    Version R 3.6.1 / DESeq2 1.26.0 / tximport 1.14.0
+    Source bioconda
+
+%help
+    R 3.6.1 (cité par l'article) + DESeq2 1.26.0 (Bioconductor 3.10, dernière
+    version compatible R 3.6) + tximport pour lire les sorties Salmon.
+    Usage : apptainer exec deseq2_1.26.0.sif Rscript mon_script.R
+
+%post
+    # procps fournit "ps", utilisé par Nextflow pour mesurer les ressources
+    apt-get update
+    apt-get install -y --no-install-recommends procps
+    rm -rf /var/lib/apt/lists/*
+
+    micromamba install -y -p /opt/conda -c conda-forge -c bioconda \
+        r-base=3.6.1 bioconductor-deseq2=1.26.0 bioconductor-tximport=1.14.0
+    micromamba clean -a -y
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+
+%test
+    R --version | head -1
+    Rscript -e 'suppressMessages({library(DESeq2); library(tximport)})' \
+            -e 'packageVersion("DESeq2"); packageVersion("tximport")'

@@ -1,0 +1,28 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+%labels
+    Tool salmon
+    Version 1.2.0
+    Source bioconda
+
+%help
+    Salmon 1.2.0, version utilisée par l'article (quantification des transcrits).
+    Usage : apptainer exec salmon_1.2.0.sif salmon --version
+
+%post
+    # procps fournit "ps", utilisé par Nextflow pour mesurer les ressources
+    apt-get update
+    apt-get install -y --no-install-recommends procps
+    rm -rf /var/lib/apt/lists/*
+
+    # tbb=2020.2 : salmon 1.2.0 a besoin de libtbb.so.2, absente de tbb >= 2021
+    micromamba install -y -p /opt/conda -c conda-forge -c bioconda \
+        salmon=1.2.0 tbb=2020.2
+    micromamba clean -a -y
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+
+%test
+    salmon --version
