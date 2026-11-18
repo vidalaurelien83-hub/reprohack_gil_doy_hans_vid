@@ -9,13 +9,13 @@ Le workflow est écrit avec **Nextflow** et chaque étape tourne dans un contene
 
 git clone https://github.com/vidalaurelien83-hub/reprohack_gil_doy_hans_vid.git
 
-cd reprohack_gil_doy_hans_vid
+cd "reprohack_gil_doy_hans_vid/Staphylococcus aureus"
 
 bash setup.sh
 
 exec bash
 
-cd ~/reprohack_gil_doy_hans_vid
+cd ~/"reprohack_gil_doy_hans_vid/Staphylococcus aureus"
 
 ### Construire les images Apptainer
 
@@ -29,7 +29,7 @@ bash run.sh
 
 Dans le terminal du PC : 
 
-scp ubuntu@<IP-DE-LA-VM>:~/reprohack_gil_doy_hans_vid/results/deseq2/*.pdf .
+scp "ubuntu@<IP-DE-LA-VM>:~/reprohack_gil_doy_hans_vid/Staphylococcus\ aureus/results/deseq2/*.pdf" .
 
 
 ## Résultats

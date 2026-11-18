@@ -1,0 +1,50 @@
+flowchart LR
+  SRA[("Lectures RNA-Seq<br/>ENA : SRR10379721 à 26<br/>3 persisters + 3 contrôles")]
+  NCBI[("Génome S. aureus NCTC 8325<br/>NCBI CP000253.1")]
+  DESIGN[/"samples.csv<br/>plan d'expérience"/]
+  ANNOTDB[("KEGG sao00001<br/>+ AureoWiki")]
+  GEO[("Résultats des auteurs<br/>GEO GSE139659")]
+
+  DLF["DOWNLOAD_FASTQ  x6<br/>wget"]
+  DLG["DOWNLOAD_GENOME<br/>wget : FASTA + GFF3"]
+  TRIM["TRIM  x6<br/>cutadapt 1.11<br/>-a TruSeq · -q 20 · -m 25"]
+  IDX["BOWTIE_INDEX<br/>bowtie-build 0.12.7"]
+  MAP["MAPPING  x6<br/>Bowtie 0.12.7 + samtools 1.16.1<br/>BAM trié et indexé"]
+  CNT["COUNT<br/>featureCounts 1.4.6-p3<br/>-t gene · -g ID · -s 1"]
+  DE["DESEQ2<br/>R 3.4.1 · DESeq2 1.16.1<br/>persisters vs contrôles, padj < 0.05"]
+  DLA["DOWNLOAD_ANNOT<br/>wget : KEGG + AureoWiki"]
+  F3C["FIG3C<br/>gènes de la traduction (182)"]
+  CMP["COMPARE<br/>reproduction vs auteurs"]
+
+  OSUP[["Supp. Fig. 3<br/>MA-plot de tous les gènes"]]
+  OF3C[["Fig. 3c<br/>MA-plot traduction"]]
+  OCMP[["Bilan : 1 485 DEG<br/>(article : 1 477)"]]
+
+  SRA --> DLF --> TRIM --> MAP
+  NCBI --> DLG
+  DLG -- FASTA --> IDX --> MAP
+  MAP -- "6 BAM" --> CNT
+  DLG -- GFF3 --> CNT
+  CNT -- counts.txt --> DE
+  DESIGN --> DE
+  DE --> OSUP
+  ANNOTDB --> DLA --> F3C
+  DE -- deseq2_results.tsv --> F3C --> OF3C
+  DE -- deseq2_results.tsv --> CMP
+  GEO --> CMP --> OCMP
+
+  classDef input fill:#EEF3F1,stroke:#7A8C84,color:#17211D,stroke-dasharray:5 4
+  classDef wget fill:#F1F4F2,stroke:#7A8C84,color:#17211D,stroke-width:2px
+  classDef cutadapt fill:#FCF1DF,stroke:#C27A12,color:#3A2600,stroke-width:2px
+  classDef bowtie fill:#E5EFFA,stroke:#2C6CB0,color:#0E2742,stroke-width:2px
+  classDef subread fill:#F0E8FA,stroke:#7A4FB0,color:#2A1544,stroke-width:2px
+  classDef rr fill:#FAE6E8,stroke:#B23A48,color:#3F0D14,stroke-width:2px
+  classDef out fill:#1F6E5A,stroke:#1F6E5A,color:#FFFFFF,stroke-width:2px
+
+  class SRA,NCBI,DESIGN,ANNOTDB,GEO input
+  class DLF,DLG,DLA wget
+  class TRIM cutadapt
+  class IDX,MAP bowtie
+  class CNT subread
+  class DE,F3C,CMP rr
+  class OSUP,OF3C,OCMP out
