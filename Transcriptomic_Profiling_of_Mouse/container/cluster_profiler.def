@@ -1,0 +1,38 @@
+
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+%labels
+    Tool clusterProfiler
+    R_Version 3.6.2
+    Bioconductor_Version 3.10
+
+%help
+    Conteneur R 3.6.2 avec clusterProfiler et org.Mm.eg.db.
+    Analyse fonctionnelle GO et KEGG.
+    Utilisation : apptainer exec cluster_profiler.sif Rscript script.R
+
+%post
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        procps \
+        build-essential \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        libxml2-dev
+    rm -rf /var/lib/apt/lists/*
+
+    micromamba install -y -p /opt/conda -c conda-forge \
+        r-base=3.6.2
+
+    Rscript -e 'install.packages("BiocManager", repos="https://cloud.r-project.org")'
+
+    Rscript -e 'BiocManager::install(c("clusterProfiler", "org.Mm.eg.db"), version="3.10", ask=FALSE, update=FALSE)'
+
+    micromamba clean -a -y
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+
+%test
+    Rscript -e 'stopifnot(getRversion() == "3.6.2"); library(clusterProfiler); library(org.Mm.eg.db); cat("R:", as.character(getRversion()), "\n"); cat("clusterProfiler:", as.character(packageVersion("clusterProfiler")), "\n"); cat("org.Mm.eg.db:", as.character(packageVersion("org.Mm.eg.db")), "\n")'
