@@ -1,40 +1,37 @@
-
 Bootstrap: docker
 From: mambaorg/micromamba:1.5.8
 
 %labels
     Tool clusterProfiler
-    R_Version 3.6.2
+    Version clusterProfiler 3.14.0 / org.Mm.eg.db 3.10.0
+    R_Version 3.6
     Bioconductor_Version 3.10
+    Source bioconda
 
 %help
-    Conteneur R 3.6.2 avec clusterProfiler et org.Mm.eg.db.
-    Analyse fonctionnelle GO et KEGG.
-    Utilisation : apptainer exec cluster_profiler.sif Rscript script.R
+    R 3.6 + clusterProfiler 3.14.0 et org.Mm.eg.db 3.10.0 (Bioconductor 3.10,
+    même génération que DESeq2 1.26.0). Analyse fonctionnelle GO et KEGG.
+    Paquets bioconda précompilés : la compilation depuis les sources échouait
+    (le R de conda attend le compilateur conda, absent de l'image).
+    Usage : apptainer exec cluster_profiler.sif Rscript script.R
 
 %post
+    # procps fournit "ps", utilisé par Nextflow pour mesurer les ressources
     apt-get update
-    apt-get install -y --no-install-recommends \
-        procps \
-        build-essential \
-        libcurl4-openssl-dev \
-        libssl-dev \
-        libxml2-dev
+    apt-get install -y --no-install-recommends procps
     rm -rf /var/lib/apt/lists/*
 
-    micromamba install -y -p /opt/conda -c conda-forge \
-        r-base=3.6.2
-
-    export PATH="/opt/conda/bin:$PATH"
-
-    Rscript -e 'options(repos=c(CRAN="https://packagemanager.posit.co/cran/2020-04-15")); install.packages("BiocManager")'
-
-    Rscript -e 'options(repos=c(CRAN="https://packagemanager.posit.co/cran/2020-04-15")); BiocManager::install(c("clusterProfiler", "org.Mm.eg.db"), version="3.10", ask=FALSE, update=FALSE)'
-
+    micromamba install -y -p /opt/conda -c conda-forge -c bioconda \
+        "r-base=3.6" \
+        bioconductor-clusterprofiler=3.14.0 \
+        bioconductor-org.mm.eg.db=3.10.0
     micromamba clean -a -y
 
 %environment
     export PATH=/opt/conda/bin:$PATH
 
 %test
-    Rscript -e 'stopifnot(getRversion() == "3.6.2"); library(clusterProfiler); library(org.Mm.eg.db); cat("R:", as.character(getRversion()), "\n"); cat("clusterProfiler:", as.character(packageVersion("clusterProfiler")), "\n"); cat("org.Mm.eg.db:", as.character(packageVersion("org.Mm.eg.db")), "\n")'
+    Rscript -e 'suppressMessages({library(clusterProfiler); library(org.Mm.eg.db)})' \
+            -e 'cat("R:", as.character(getRversion()), "\n")' \
+            -e 'cat("clusterProfiler:", as.character(packageVersion("clusterProfiler")), "\n")' \
+            -e 'cat("org.Mm.eg.db:", as.character(packageVersion("org.Mm.eg.db")), "\n")'
