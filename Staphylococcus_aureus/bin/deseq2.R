@@ -29,7 +29,7 @@ counts <- counts[, samples$sample]      # même ordre que samples.csv
 # "control" = référence : log2FC > 0 veut dire plus exprimé chez les persisters
 samples$condition <- factor(samples$condition, levels = c("control", "persister"))
 
-# --- 3. DESeq2 avec les paramètres par défaut (comme l'article) ------
+# --- 3. DESeq2 avec les paramètres par défaut (comme l'article : test de Wald) ------
 dds <- DESeqDataSetFromMatrix(countData = as.matrix(counts),
                               colData   = samples,
                               design    = ~ condition)
