@@ -70,7 +70,7 @@ process TRIM {
 
     script:
     """
-        cutadapt -a ${params.adapter} -q 20 -m 25 -o ${srr}.trimmed.fastq.gz ${fastq}
+        cutadapt -a ${params.adapter} -q 30 -m 25 -o ${srr}.trimmed.fastq.gz ${fastq}
     """
 }
 
