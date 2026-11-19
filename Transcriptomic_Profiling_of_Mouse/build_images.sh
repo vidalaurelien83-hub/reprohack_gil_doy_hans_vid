@@ -8,14 +8,13 @@
 # =====================================================================
 set -euo pipefail
 
-cd "$(dirname "$0")"     # se placer à la racine du dépôt
+cd "$(dirname "$0")"     # se placer dans le dossier qui contient ce script
 mkdir -p images
 
 FORCE=false
 [ "${1:-}" = "--force" ] && FORCE=true
 
-# Bowtie 0.12.7, subread 1.4.6-p3 et les vieux paquets conda
-# n'existent que pour les processeurs x86_64 (pas ARM)
+
 if [ "$(uname -m)" != "x86_64" ]; then
     echo "ERREUR : architecture $(uname -m) non supportée (x86_64 requis)." >&2
     exit 1
