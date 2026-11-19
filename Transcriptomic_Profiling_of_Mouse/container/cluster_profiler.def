@@ -27,9 +27,9 @@ From: mambaorg/micromamba:1.5.8
 
     export PATH="/opt/conda/bin:$PATH"
 
-    Rscript -e 'install.packages("BiocManager", repos="https://cloud.r-project.org")'
+    Rscript -e 'options(repos=c(CRAN="https://packagemanager.posit.co/cran/2020-04-15")); install.packages("BiocManager")'
 
-    Rscript -e 'BiocManager::install(c("clusterProfiler", "org.Mm.eg.db"), version="3.10", ask=FALSE, update=FALSE)'
+    Rscript -e 'options(repos=c(CRAN="https://packagemanager.posit.co/cran/2020-04-15")); BiocManager::install(c("clusterProfiler", "org.Mm.eg.db"), version="3.10", ask=FALSE, update=FALSE)'
 
     micromamba clean -a -y
 
