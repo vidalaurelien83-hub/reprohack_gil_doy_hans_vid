@@ -1,28 +1,30 @@
 #!/usr/bin/env Rscript
 # =====================================================================
-# enrichment.R - Enrichissement GO (BP) et KEGG des gènes DE, par temps
+# enrichment.R - Enrichissement GO (BP) et KEGG des DETs, par temps
 #                (R 3.6.2 / clusterProfiler, Bioconductor 3.10)
-# Usage   : Rscript enrichment.R   (lit deg_dpi*.tsv et results_dpi*.tsv
-#           dans le dossier courant)
+# Usage   : Rscript enrichment.R   (lit det_dpi*.tsv et results_dpi*.tsv
+#           dans le dossier courant, sorties de deseq2.R)
 # Sorties : GO_dpi{11,33}.tsv, KEGG_dpi{11,33}.tsv
+# Note    : GO/KEGG travaillent sur des gènes : chaque DET est ramené à
+#           son gene_id (plusieurs transcrits d'un gène = un seul gène).
 # =====================================================================
 suppressPackageStartupMessages({
   library(clusterProfiler)
   library(org.Mm.eg.db)
 })
 
-deg_files    <- list.files(pattern = '^deg_dpi[0-9]+\\.tsv$')
+det_files    <- list.files(pattern = '^det_dpi[0-9]+\\.tsv$')
 result_files <- list.files(pattern = '^results_dpi[0-9]+\\.tsv$')
-if (!length(deg_files)) stop('No adjusted-p-value DEG tables found')
+if (!length(det_files)) stop('No DET tables (det_dpi*.tsv) found')
 
-for (f in deg_files) {
-  dpi  <- sub('^deg_dpi([0-9]+)\\.tsv$', '\\1', f)
+for (f in det_files) {
+  dpi  <- sub('^det_dpi([0-9]+)\\.tsv$', '\\1', f)
   full <- paste0('results_dpi', dpi, '.tsv')
   if (!(full %in% result_files)) stop('Missing full result table: ', full)
 
-  deg <- read.delim(f, stringsAsFactors = FALSE)
+  det <- read.delim(f, stringsAsFactors = FALSE)
   all <- read.delim(full, stringsAsFactors = FALSE)
-  ids          <- unique(deg$gene_id)
+  ids          <- unique(det$gene_id[!is.na(det$gene_id)])
   universe_ids <- unique(all$gene_id[!is.na(all$gene_id)])
 
   # Ensembl -> Entrez (identifiants attendus par enrichGO / enrichKEGG)

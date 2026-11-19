@@ -61,18 +61,22 @@ process TRIMMOMATIC {
     tag "$sample"
     cpus 4
     container = "${projectDir}/images/trimmomatic_0.39.sif"
-    publishDir "${params.outdir}/trimmed", mode: 'copy'
+    // Les FASTQ nettoyés (~5 Go par échantillon) restent dans work/ : on ne
+    // publie que le résumé (reads conservés), à comparer aux >60 M de l'article
+    publishDir "${params.outdir}/trimming", mode: 'copy', pattern: '*.summary.txt'
 
     input:
     tuple val(sample), path(read1), path(read2)
 
     output:
     tuple val(sample), path("${sample}_R1.paired.fastq.gz"), path("${sample}_R2.paired.fastq.gz"), emit: paired
+    path "${sample}.trimmomatic.summary.txt", emit: summary
 
     script:
     """
     set -euo pipefail
     trimmomatic PE -threads ${task.cpus} -phred33 \\
+      -summary ${sample}.trimmomatic.summary.txt \\
       ${read1} ${read2} \\
       ${sample}_R1.paired.fastq.gz ${sample}_R1.unpaired.fastq.gz \\
       ${sample}_R2.paired.fastq.gz ${sample}_R2.unpaired.fastq.gz \\
@@ -132,13 +136,36 @@ process DESEQ2 {
 
     output:
     path 'results_dpi*.tsv', emit: results
-    path 'deg_dpi*.tsv', emit: degs
+    path 'det_dpi*.tsv', emit: dets          // det_dpi{11,33}.tsv + variantes _padj
     path 'deseq2_summary.txt', emit: summary
 
     script:
     """
     set -euo pipefail
     Rscript "${projectDir}/bin/deseq2.R" '${samplesheet}' '${gtf}' *.quant.sf | tee deseq2_summary.txt
+    """
+}
+
+// Figure 2B : Venn des DETs 11 vs 33 dpi (script R : bin/venn.R)
+// Deux versions : seuil principal (p < 0,05) et variante padj, pour comparer
+process VENN {
+    container = "${projectDir}/images/deseq2_1.26.0.sif"
+    publishDir "${params.outdir}/figures", mode: 'copy'
+
+    input:
+    path det_files
+
+    output:
+    path 'venn_2B*.pdf', emit: pdf
+    path 'venn_2B*.tsv', emit: tables
+    path 'venn_summary.txt', emit: summary
+
+    script:
+    """
+    set -euo pipefail
+    Rscript "${projectDir}/bin/venn.R" det_dpi11.tsv det_dpi33.tsv venn_2B > venn_summary.txt
+    Rscript "${projectDir}/bin/venn.R" det_dpi11_padj.tsv det_dpi33_padj.tsv venn_2B_padj >> venn_summary.txt
+    cat venn_summary.txt
     """
 }
 
@@ -149,7 +176,7 @@ process CLUSTERPROFILER {
     publishDir "${params.outdir}/enrichment", mode: 'copy'
 
     input:
-    path deg_files
+    path det_files
     path result_files
 
     output:
@@ -180,9 +207,10 @@ workflow {
     sheet_for_deseq = Channel.fromPath(params.samplesheet)
     gtf_for_deseq = refs.refs.map { it[1] }
     differential = DESEQ2(all_quants, sheet_for_deseq, gtf_for_deseq)
+    VENN(differential.dets)
 
     if (params.run_enrichment) {
-        CLUSTERPROFILER(differential.degs, differential.results)
+        CLUSTERPROFILER(differential.dets, differential.results)
     }
 }
 
