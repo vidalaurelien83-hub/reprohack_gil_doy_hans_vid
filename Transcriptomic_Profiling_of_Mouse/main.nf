@@ -14,6 +14,10 @@ params.gtf_url     = 'https://ftp.ensembl.org/pub/release-100/gtf/mus_musculus/M
 // The paper does not report these exact Trimmomatic options; they are explicit reconstruction choices.
 params.trim_adapters = '/opt/conda/share/trimmomatic/adapters/TruSeq3-PE.fa'
 params.trim_args     = "ILLUMINACLIP:${params.trim_adapters}:2:30:10 SLIDINGWINDOW:4:20 MINLEN:36"
+// Les FASTQ de l'ENA sont déjà nettoyés : leur nombre de reads est exactement
+// la colonne "Clean reads" du Tableau 1. --skip_trimming les donne
+// directement à Salmon, sans repasser par Trimmomatic.
+params.skip_trimming = false
 // Salmon library type is automatically inferred; these bias/mapping options are recorded here.
 params.salmon_extra  = '--validateMappings --seqBias --gcBias'
 // Optional GO/KEGG enrichment with the clusterProfiler image.
@@ -199,9 +203,13 @@ workflow {
 
     reads = DOWNLOAD_FASTQ(sample_rows)
     refs = DOWNLOAD_REFERENCE()
-    trimmed = TRIMMOMATIC(reads.reads)
+    if (params.skip_trimming) {
+        reads_for_quant = reads.reads
+    } else {
+        reads_for_quant = TRIMMOMATIC(reads.reads).paired
+    }
     index = SALMON_INDEX(refs.refs.map { it[0] })
-    quantified = SALMON_QUANT(trimmed.paired, index.index)
+    quantified = SALMON_QUANT(reads_for_quant, index.index)
 
     all_quants = quantified.quant.map { sample, quant -> quant }.collect()
     sheet_for_deseq = Channel.fromPath(params.samplesheet)
